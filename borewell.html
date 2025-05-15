@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Water Level Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #efe59d;
+      background-image: url("src/img/cartoonwater.png"),
+        url("https://deeplor.s3.us-west-2.amazonaws.com/upload/2025/05/15/858d330d8c4248e69faca1f213a973f4.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .maincontainer {
+      padding: 20px;
+      height: 70vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5vh;
+    }
+
+    .container {
+      width: 60vh;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      background-color: rgba(51, 51, 51, 0.7);
+      border-radius: 30px;
+      padding: 20px;
+      position: relative;
+    }
+
+    .container-child {
+      border-radius: 50px;
+      width: 40vh;
+      height: 6vh;
+      text-align: center;
+      font-weight: 900;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .calculateButton {
+      height: 40px;
+      width: 120px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50px;
+      display: flex;
+      background-color: #ab7b2f;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    .calculateButton:hover {
+      background-color: #92661f;
+    }
+
+    .total {
+      border-radius: 50px;
+      width: 60vh;
+      height: 10vh;
+      background-color: rgba(51, 51, 51, 0.7);
+      display: flex;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    #totalOutput {
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        width: 90vw;
+        padding: 20px;
+        gap: 20px;
+        border-radius: 20px;
+      }
+
+      .container-child {
+        width: 80vw;
+      }
+
+      .total {
+        width: 90vw;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="maincontainer">
+    <div class="container">
+      <h1 style="color:white;">Water-Level</h1>
+      <input
+        class="container-child"
+        type="number"
+        id="height"
+        placeholder="Height of borewell (feet)"
+      />
+      <input
+        class="container-child"
+        type="number"
+        id="diameter"
+        placeholder="Diameter of borewell (feet)"
+      />
+      <input
+        class="container-child"
+        type="number"
+        id="time"
+        placeholder="Sound return time (sec)"
+      />
+      <button class="calculateButton" onclick="findWaterLevel()">Calculate</button>
+    </div>
+
+    <div id="totalOutput" class="total">
+      <!-- Result will show here -->
+    </div>
+  </div>
+
+  <script>
+    function findWaterLevel() {
+      const heightInput = parseFloat(document.getElementById("height").value);
+      const diameterInput = parseFloat(document.getElementById("diameter").value);
+      const time = parseFloat(document.getElementById("time").value);
+
+      const output = document.getElementById("totalOutput");
+
+      // Input validation
+      if (isNaN(heightInput) || isNaN(diameterInput) || isNaN(time)) {
+        output.innerText = "❗ Please enter all values correctly.";
+        return;
+      }
+
+      // Convert feet to meters
+      const height = heightInput * 0.3048;
+      const diameter = (diameterInput / 12) * 0.3048;
+      const radius = diameter / 2;
+
+      const g = 9.8; // Acceleration due to gravity (m/s^2)
+      const speedOfSound = 346.01; // m/s at 25°C
+
+      const timeFall = time - (height / speedOfSound);
+      if (timeFall <= 0) {
+        output.innerText = "❗ Invalid time recorded. Please try again.";
+        return;
+      }
+
+      const emptyHeight = 0.5 * g * Math.pow(timeFall, 2);
+      const totalVolume = Math.PI * Math.pow(radius, 2) * height;
+      const emptyVolume = Math.PI * Math.pow(radius, 2) * emptyHeight;
+      const waterVolumeMeters = totalVolume - emptyVolume;
+
+      const capacityPercent = (waterVolumeMeters / totalVolume) * 100;
+
+      output.innerText = `Water volume: ${waterVolumeMeters.toFixed(2)} m³  (${capacityPercent.toFixed(2)}% full)`;
+    }
+  </script>
+
+</body>
+</html>
